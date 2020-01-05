@@ -8,15 +8,15 @@ from datetime import datetime
 
 
 class Article:
-    def __init__(self, id, title, date, data, related):
+    def __init__(self, id, title, date, content, related):
         self.id = id
         self.title = title
         self.date = date
-        self.data = data
+        self.content = content
         self.related = related
 
     def hash(self):
-        return hashlib.md5(self.data.encode("utf-8")).hexdigest()[:10]
+        return hashlib.md5(self.content.encode("utf-8")).hexdigest()[:10]
 
 def stringify_soup(element):
     if element.string:
