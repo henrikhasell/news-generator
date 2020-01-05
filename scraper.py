@@ -91,22 +91,22 @@ def crawl(article_id):
 
 
 def crawl_concurrent(article_id):
-    article = fetch_and_save_bbc_news_article(article_id)
-
     threads = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        for related_article in article.related:
-            if related_article not in visited:
-                threads += [executor.submit(crawl_concurrent, related_article)]
+        def create_thread(article_id, threads):
+            article = fetch_and_save_bbc_news_article(article_id)
+            for related_article_id in article.related:
+                if related_article_id not in visited:
+                    threads += [executor.submit(create_thread, related_article_id, threads)]
 
-    for thread in threads:
-        thread.result()
+        create_thread(article_id, threads)
 
+        for thread in threads:
+            thread.result()
 
 
 visited = []
-
 
 if __name__ == "__main__":
     crawl_concurrent("uk-politics-50874389")
