@@ -73,7 +73,7 @@ def save_news_article(article):
     create_directory_if_not_exist(f"data/{directory_name}")
 
     with open(f"data/{directory_name}/{file_name}", "wb+") as file:
-        file.write(article.data.encode("utf-8"))
+        file.write(article.content.encode("utf-8"))
 
 
 def fetch_and_save_bbc_news_article(article_id):
