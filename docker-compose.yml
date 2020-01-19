@@ -1,0 +1,22 @@
+version: '2.2'
+
+services:
+  web:
+    build: ./web
+    environment:
+      - DATABASE_URL=postgres://user:user@postgres
+    ports:
+      - 0.0.0.0:9000:9000/tcp
+    depends_on:
+      - postgres
+  headlines:
+    build: ./headlines
+    environment:
+      - WEB_URL=http://web:9000/api/articles
+    depends_on:
+      - web
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=user

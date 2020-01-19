@@ -1,0 +1,50 @@
+{% extends "bootstrap.html" %}
+{% block title %}Categories{% endblock %}
+{% block body %}
+    <h1>Browse Articles By Category</h1>
+
+    <form class="form-inline py-2">
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select class="form-control mx-2" name="category">
+                {% for category in categories %}
+                    {% if selected_category == category["name"] %}
+                        <option value="{{ category["name"] }}" selected>
+                    {% else %}
+                        <option value="{{ category["name"] }}">
+                    {% endif %}
+                        {{ category['name'] }} ({{ category['count'] }})
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Display Results</button>
+        </div>
+    </form>
+
+    <hr/>
+
+    <div class="row">
+        {% for article in articles %}
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="card-title text-truncate">
+                            <strong>
+                                {{ article["title"] }}
+                            </strong>
+                        </div>
+                        <div>
+                            <span class="text-nowrap">
+                                Uploaded {{ article["date_added"] }}.
+                            </span>
+                                <span class="text-nowrap text-muted">
+                                Published {{ article["date_published"] }}.
+                            </span>
+                        </div>
+                        <a href="{{ url_for('article', article_id=article["id"]) }}" class="stretched-link"></a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

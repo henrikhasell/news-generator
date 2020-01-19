@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Article{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="col-md-6 mx-auto text-center">
+            <h4>{{ article["title"] }}</h4>
+            <h5>{{ article["category"] }}</h5>
+            <a href="{{ article["url"] }}">{{ article["url"] }}</a>
+            <hr/>
+            {% for paragraph in article["paragraphs"] %}
+                <p>{{ paragraph }}</p>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}
