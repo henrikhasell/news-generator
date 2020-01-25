@@ -94,9 +94,16 @@ def fetch_bbc_news_article(article_id):
     )
 
 
+def post_news_article_elasticsearch(article):
+    pass
+    # article_json = article.json()
+    # es = Elasticsearch(["10.0.75.1"], http_auth=("elastic", "changeme"))
+    # es.index()
+
 @retry.retry(tries=5)
 def post_news_article(article):
-    response = requests.post(web_url, json=article.json())
+    article_json = article.json()
+    response = requests.post(web_url, json=article_json)
 
 
 def save_news_article(article):

@@ -5,16 +5,18 @@ services:
     build: ./web
     environment:
       - DATABASE_URL=postgres://user:user@postgres
+      - WEB_SENTRY_DSN
     ports:
       - 0.0.0.0:9000:9000/tcp
     depends_on:
       - postgres
   headlines:
     build: ./headlines
-    environment:
-      - WEB_URL=http://web:9000/api/articles
     depends_on:
       - web
+    environment:
+      - WEB_URL=http://web:9000/api/articles
+      - HEADLINES_SENTRY_DSN
   postgres:
     image: postgres
     environment:

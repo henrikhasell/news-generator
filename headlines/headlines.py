@@ -1,7 +1,14 @@
 from scraper import ArticleError, fetch_and_save_bbc_news_article, get_article_id_from_string, is_news_article
 from bs4 import BeautifulSoup
 import concurrent.futures
+import os
 import requests
+import sentry_sdk
+
+sentry_dsn = os.environ.get("HEADLINES_SENTRY_DSN", None)
+
+if sentry_dsn:
+    sentry_sdk.init(sentry_dsn)
 
 news_categories = [
     'https://www.bbc.co.uk/news/uk',

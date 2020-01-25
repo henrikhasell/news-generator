@@ -1,9 +1,8 @@
-import datetime
+from datetime import datetime
 import flask_sqlalchemy
 import retry
 import sqlalchemy
 import timeago
-
 
 db = flask_sqlalchemy.SQLAlchemy()
 
@@ -20,14 +19,14 @@ def get_model_attributes(model):
     return [i for i in dir(model) if is_valid_attribute(i)]
 
 
-def serialise_attribute(attr, date_format=relative_date):
-    if type(attr) == datetime.datetime:
+def serialise_attribute(attr, date_format):
+    if type(attr) == datetime:
         return date_format(attr)
     return attr
 
 
-def serialise_model(model):
-    return {i: serialise_attribute(getattr(model, i)) for i in get_model_attributes(model)}
+def serialise_model(model, date_format=relative_date):
+    return {i: serialise_attribute(getattr(model, i), date_format) for i in get_model_attributes(model)}
 
 
 class Article(db.Model):
@@ -54,7 +53,7 @@ def add_article(article_json):
         category=article_json["category"],
         paragraphs=article_json["paragraphs"],
         date_published=article_json["date_published"],
-        date_added=datetime.datetime.now()
+        date_added=datetime.now()
     )
     result = 'success'
     try:
@@ -78,7 +77,7 @@ def get_distinct_categories():
     return query
 
 
-def get_distinct_categories_with_count():
+def count_articles_by_category():
     categories = []
     for name in get_distinct_categories():
         count = Article.query.filter_by(category=name).count()
@@ -87,17 +86,13 @@ def get_distinct_categories_with_count():
 
 
 def get_articles_by_category(category):
-    return [serialise_model(i) for i in Article.query.filter_by(category=category).order_by(Article.date_added.desc()).all()]
+    return [serialise_model(i) for i in
+            Article.query.filter_by(category=category).order_by(Article.date_added.desc()).all()]
 
 
 def get_article_by_id(article_id):
     article = Article.query.filter_by(id=article_id).first()
     return serialise_model(article) if article else None
-
-
-default_categories = [
-    'UK Politics'
-]
 
 
 def get_articles(from_date, until_date, exclude_categories=[]):

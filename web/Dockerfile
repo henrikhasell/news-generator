@@ -9,6 +9,7 @@ gunicorn==20.0.4 \
 markovify==0.7.2 \
 psycopg2==2.8.4 \
 retry==0.9.2 \
+sentry-sdk==0.14.1 \
 timeago==1.0.13
 
 WORKDIR /app

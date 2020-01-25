@@ -1,12 +1,14 @@
 import flask
-import api
 import os
+import api
 import poem
+import sentry_sdk
 import storage
 
+sentry_dsn = os.environ.get("WEB_SENTRY_DSN", None)
 
-path = r'C:\Users\HasellHenrik\Documents'\
-       r'\Repositories\Personal\news-generator'
+if sentry_dsn:
+    sentry_sdk.init(sentry_dsn)
 
 app = flask.Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", 'postgres://user:user@localhost')
@@ -18,7 +20,7 @@ storage.initialise(app)
 
 @app.route("/categories")
 def category():
-    categories = storage.get_distinct_categories_with_count()
+    categories = storage.count_articles_by_category()
     selected_category = flask.request.args.get("category") or "UK Politics"
     articles = storage.get_articles_by_category(selected_category)
     return flask.render_template(
