@@ -1,6 +1,7 @@
 from scraper import ArticleError, fetch_and_save_bbc_news_article, get_article_id_from_string, is_news_article
 from bs4 import BeautifulSoup
 import concurrent.futures
+import logging
 import os
 import requests
 import sentry_sdk
@@ -40,7 +41,7 @@ def save_all_articles_at_url(url):
             try:
                 thread.result()
             except ArticleError as e:
-                print(e)
+                logging.error(e)
 
 
 def fetch_and_save_headlines():
