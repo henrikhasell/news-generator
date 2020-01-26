@@ -6,8 +6,11 @@ import requests
 import retry
 from bs4 import BeautifulSoup
 from datetime import datetime
+from elasticsearch import Elasticsearch
 
 
+elastic_user = os.environ.get('ELASTIC_USER', None)
+elastic_pass = os.environ.get('ELASTIC_PASS', None)
 web_url = os.environ.get('WEB_URL', 'http://localhost:5000/api/articles')
 
 
@@ -27,13 +30,27 @@ class Article:
     def hash(self):
         return hashlib.md5(self.content.encode("utf-8")).hexdigest()[:10]
 
+    def url(self):
+        return f'https://www.bbc.co.uk/news/{self.id}'
+
     def json(self):
         return {
-            'url': f'https://www.bbc.co.uk/news/{self.id}',
+            'url': self.url(),
             'title': self.title,
             'date_published': self.date.isoformat(),
             'paragraphs': self.content.split('\n'),
             'category': self.category
+        }
+
+    def elastic_info(self):
+        return {
+            'body': {
+                'date_downloaded': datetime.now().isoformat(),
+                'date_published': self.date.isoformat(),
+                'title': self.title
+            },
+            'id': self.url(),
+            'index': 'articles'
         }
 
 
@@ -95,10 +112,12 @@ def fetch_bbc_news_article(article_id):
 
 
 def post_news_article_elasticsearch(article):
-    pass
-    # article_json = article.json()
-    # es = Elasticsearch(["10.0.75.1"], http_auth=("elastic", "changeme"))
-    # es.index()
+    if not elastic_user or not elastic_pass:
+        return
+
+    article_json = article.elastic_info()
+    es = Elasticsearch(["10.0.75.1"], http_auth=(elastic_user, elastic_pass))
+    es.index(**article_json)
 
 @retry.retry(tries=5)
 def post_news_article(article):
@@ -118,6 +137,7 @@ def save_news_article(article):
 
 def fetch_and_save_bbc_news_article(article_id):
     article = fetch_bbc_news_article(article_id)
+    post_news_article_elasticsearch(article)
     post_news_article(article)
     return article
 
