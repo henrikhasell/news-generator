@@ -116,13 +116,16 @@ def post_news_article_elasticsearch(article):
         return
 
     article_json = article.elastic_info()
-    es = Elasticsearch(["10.0.75.1"], http_auth=(elastic_user, elastic_pass))
+    es = Elasticsearch(["172.17.0.1"], http_auth=(elastic_user, elastic_pass))
     es.index(**article_json)
 
 @retry.retry(tries=5)
 def post_news_article(article):
     article_json = article.json()
     response = requests.post(web_url, json=article_json)
+
+    if response.status_code == 201:
+        post_news_article_elasticsearch(article)
 
 
 def save_news_article(article):
@@ -137,7 +140,6 @@ def save_news_article(article):
 
 def fetch_and_save_bbc_news_article(article_id):
     article = fetch_bbc_news_article(article_id)
-    post_news_article_elasticsearch(article)
     post_news_article(article)
     return article
 

@@ -1,8 +1,9 @@
 from datetime import datetime
+from retry import retry
 import flask_sqlalchemy
-import retry
 import sqlalchemy
 import timeago
+
 
 db = flask_sqlalchemy.SQLAlchemy()
 
@@ -39,7 +40,7 @@ class Article(db.Model):
     date_added = db.Column(db.DateTime)
 
 
-@retry.retry(tries=3, delay=1)
+@retry(tries=3, delay=1)
 def initialise(app):
     db.init_app(app)
     with app.app_context():
@@ -55,14 +56,18 @@ def add_article(article_json):
         date_published=article_json["date_published"],
         date_added=datetime.now()
     )
-    result = 'success'
+
+    result = {"title": article.title}
+
     try:
         db.session.add(article)
         db.session.commit()
-    except sqlalchemy.exc.IntegrityError as e:
-        result = 'integrity error'
+        return_code = 201
+    except sqlalchemy.exc.IntegrityError:
         db.session.rollback()
-    return {'result': result}
+        return_code = 200
+
+    return result, return_code
 
 
 def get_all_articles():
