@@ -1,4 +1,4 @@
-from scraper import ArticleError, fetch_and_save_bbc_news_article, get_article_id_from_string, is_news_article
+from scraper import ArticleError, crawl_concurrent, fetch_and_save_bbc_news_article, get_article_id_from_string, is_news_article
 from bs4 import BeautifulSoup
 import concurrent.futures
 import logging
@@ -49,10 +49,13 @@ def fetch_and_save_headlines():
         threads = []
 
         for news_category in news_categories:
-            threads += [executor.submit(save_all_articles_at_url, news_category)]
+            threads += [executor.submit(crawl_concurrent, news_category)]
 
         for thread in threads:
-            thread.result()
+            try:
+                thread.result()
+            except ArticleError as e:
+                logging.error(e)
 
 
 if __name__ == '__main__':
