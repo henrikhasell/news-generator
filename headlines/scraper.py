@@ -47,6 +47,7 @@ class Article:
             'body': {
                 'date_downloaded': datetime.now().isoformat(),
                 'date_published': self.date.isoformat(),
+                'category': self.category,
                 'title': self.title
             },
             'id': self.url(),
