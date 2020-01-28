@@ -36,7 +36,7 @@ def save_all_articles_at_url(url):
     with concurrent.futures.ThreadPoolExecutor() as executor:
         threads = []
         for article_id in get_all_articles_at_url(url):
-            threads += [executor.submit(fetch_and_save_bbc_news_article, article_id)]
+            threads += [executor.submit(crawl_concurrent, article_id)]
         for thread in threads:
             try:
                 thread.result()
@@ -49,13 +49,10 @@ def fetch_and_save_headlines():
         threads = []
 
         for news_category in news_categories:
-            threads += [executor.submit(crawl_concurrent, news_category)]
+            threads += [executor.submit(save_all_articles_at_url, news_category)]
 
         for thread in threads:
-            try:
-                thread.result()
-            except ArticleError as e:
-                logging.error(e)
+            thread.result()
 
 
 if __name__ == '__main__':
