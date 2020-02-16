@@ -3,13 +3,14 @@ version: '2.2'
 services:
   web:
     build: ./web
+    depends_on:
+      - postgres
     environment:
       - DATABASE_URL=postgres://user:user@postgres
       - WEB_SENTRY_DSN
     ports:
       - 0.0.0.0:9000:9000/tcp
-    depends_on:
-      - postgres
+    restart: unless-stopped
   headlines:
     build: ./headlines
     depends_on:
@@ -19,8 +20,10 @@ services:
       - ELASTIC_USER
       - ELASTIC_PASS
       - HEADLINES_SENTRY_DSN
+    restart: unless-stopped
   postgres:
     image: postgres
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=user
+    restart: unless-stopped
