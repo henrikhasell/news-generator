@@ -1,4 +1,5 @@
 from datetime import datetime
+from dateutil.rrule import DAILY, rrule
 from retry import retry
 import flask_sqlalchemy
 import sqlalchemy
@@ -88,6 +89,44 @@ def count_articles_by_category():
         count = Article.query.filter_by(category=name).count()
         categories += [{'name': name, 'count': count}]
     return categories
+
+
+def count_articles_by_date_published(from_date, until_date, exclude_categories=[]):
+    articles = Article.query \
+        .filter(Article.date_published >= from_date) \
+        .filter(Article.date_published <= until_date) \
+        .filter(Article.category.notin_(exclude_categories)).all()
+
+    result = {}
+
+    for dt in rrule(DAILY, dtstart=from_date, until=until_date):
+        string_time = dt.strftime("%Y-%m-%d")
+        result[string_time] = 0
+
+    for article in articles:
+        string_time = article.date_published.strftime("%Y-%m-%d")
+        result[string_time] += 1
+
+    return result
+
+
+def count_articles_by_date_added(from_date, until_date, exclude_categories=[]):
+    articles = Article.query \
+        .filter(Article.date_added >= from_date) \
+        .filter(Article.date_added <= until_date) \
+        .filter(Article.category.notin_(exclude_categories)).all()
+
+    result = {}
+
+    for dt in rrule(DAILY, dtstart=from_date, until=until_date):
+        string_time = dt.strftime("%Y-%m-%d")
+        result[string_time] = 0
+
+    for article in articles:
+        string_time = article.date_added.strftime("%Y-%m-%d")
+        result[string_time] += 1
+
+    return result
 
 
 def get_articles_by_category(category):

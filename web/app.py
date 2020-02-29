@@ -1,11 +1,19 @@
 import flask
+import logging
 import os
 import api
+import calendar_render
 import poem
 import sentry_sdk
 import storage
+from datetime import datetime
 
+
+logging_level = os.environ.get("LOGGING_LEVEL", None)
 sentry_dsn = os.environ.get("WEB_SENTRY_DSN", None)
+
+if logging_level:
+    logging.basicConfig(level=logging_level)
 
 if sentry_dsn:
     sentry_sdk.init(sentry_dsn)
@@ -16,6 +24,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['RESTPLUS_VALIDATE '] = True
 app.register_blueprint(api.blueprint, url_prefix='/api')
 storage.initialise(app)
+
+
+with app.app_context():
+    poem_generator = poem.PoemGenerator()
 
 
 @app.route("/categories")
@@ -39,18 +51,36 @@ def article(article_id):
     return flask.render_template("article.html", article=article)
 
 
+@app.route("/calendar/<int:year>/<int:month>", defaults={"day": None})
+@app.route("/calendar/<int:year>/<int:month>/<int:day>")
+def calendar_month(year, month, day):
+    if day:
+        from_date = datetime(year, month, day)
+        until_date = datetime(year, month, day + 1)
+
+        articles = storage.get_articles(from_date, until_date)
+    else:
+        articles = None
+
+    return flask.render_template(
+        "calendar.html",
+        articles=articles,
+        table_json=calendar_render.articles_published_calendar(year, month))
+
+
 @app.route("/", defaults={"mode": "all"})
 @app.route("/<mode>")
 def index(mode):
-    poem_generator = poem.PoemGenerator()
     if mode not in ['all', 'this_month', 'this_year', 'today']:
         flask.abort(404)
+
     mode_description = {
         'all': None,
         'this_month': "This poem was generated from this month's news.",
         'this_year': "This poem was generated from this year's news.",
         'today': "This poem was generated from today's news."
     }
+
     return flask.render_template(
         "index.html",
          mode_description=mode_description[mode],
