@@ -76,7 +76,7 @@ def create_directory_if_not_exist(directory):
         os.makedirs(directory)
 
 
-@retry.retry(tries=5)
+@retry.retry(exceptions=requests.RequestException, tries=5)
 def fetch_bbc_news_article(article_id):
     result = requests.get(f"https://www.bbc.co.uk/news/{article_id}")
     soup = BeautifulSoup(result.text, 'html.parser')
