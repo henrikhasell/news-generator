@@ -33,26 +33,16 @@ def get_all_articles_at_url(url):
 
 
 def save_all_articles_at_url(url):
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        threads = []
-        for article_id in get_all_articles_at_url(url):
-            threads += [executor.submit(crawl_concurrent, article_id)]
-        for thread in threads:
-            try:
-                thread.result()
-            except ArticleError as e:
-                logging.error(e)
+    for article_id in get_all_articles_at_url(url):
+        try:
+            crawl_concurrent(article_id)
+        except ArticleError as e:
+            logging.error(e)
 
 
 def fetch_and_save_headlines():
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        threads = []
-
-        for news_category in news_categories:
-            threads += [executor.submit(save_all_articles_at_url, news_category)]
-
-        for thread in threads:
-            thread.result()
+    for news_category in news_categories:
+        save_all_articles_at_url(news_category)
 
 
 if __name__ == '__main__':

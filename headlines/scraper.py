@@ -148,28 +148,24 @@ def fetch_and_save_bbc_news_article(article_id):
 def crawl(article_id):
     article = fetch_and_save_bbc_news_article(article_id)
     for related_article in article.related:
-        if related_article not in visited:
-            visited.append(related_article)
-            crawl(related_article)
+        crawl(related_article)
 
 
 def crawl_concurrent(article_id):
     threads = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        def create_thread(_article_id, _threads):
+        def create_thread(_article_id, _threads, depth):
             article = fetch_and_save_bbc_news_article(_article_id)
-            for related_article_id in article.related:
-                if related_article_id not in visited:
-                    _threads += [executor.submit(create_thread, related_article_id, _threads)]
+            if depth < 10:
+                for related_article_id in article.related:
+                    _threads += [executor.submit(create_thread, related_article_id, _threads, depth+1)]
 
-        create_thread(article_id, threads)
+        create_thread(article_id, threads, 0)
 
         for thread in threads:
             thread.result()
 
-
-visited = []
 
 if __name__ == "__main__":
     crawl_concurrent("uk-politics-50874389")

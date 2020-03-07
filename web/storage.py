@@ -48,7 +48,15 @@ def initialise(app):
         db.create_all()
 
 
+def article_exists(url):
+    article = Article.query.filter_by(url=url).one_or_none()
+    return bool(article)
+
+
 def add_article(article_json):
+    if article_exists(article_json["url"]):
+        return
+
     article = Article(
         url=article_json["url"],
         title=article_json["title"],
