@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil.rrule import DAILY, rrule
 from retry import retry
 import flask_sqlalchemy
+import logging
 import sqlalchemy
 import timeago
 
@@ -56,6 +57,8 @@ def article_exists(url):
 def add_article(article_json):
     if article_exists(article_json["url"]):
         return
+
+    logging.info(f"Adding article {article_json['url']}")
 
     article = Article(
         url=article_json["url"],
