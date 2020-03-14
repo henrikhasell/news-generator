@@ -28,8 +28,33 @@
     </table>
   </div>
   {% if articles %}
-      {% for article in articles %}
-          {{ article }}
-      {% endfor %}
+  <div class="table-responsive">
+      <table class="table table-sm">
+          <thead>
+              <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Date Published</th>
+                  <th>Date Added</th>
+              </tr>
+	  </thead>
+	  <tbody>
+              {% for article in articles %}
+                  <tr>
+                      <td>{{article["title"]}}</td>
+                      <td>{{article["category"]}}</td>
+                      <td>
+                          <span>{{article["date_published"]["ddmmyy"]}}</span>
+                          <span>{{article["date_published"]["hhmmss"]}}</span>
+                      </td>
+                      <td>
+                          <span>{{article["date_added"]["ddmmyy"]}}</span>
+                          <span>{{article["date_added"]["hhmmss"]}}</span>
+                      </td>
+                  </tr>
+              {% endfor %}
+	  </tbody>
+        </table>
+    </div>
   {% endif %}
 {% endblock %}

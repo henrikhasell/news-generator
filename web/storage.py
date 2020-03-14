@@ -14,6 +14,12 @@ def relative_date(date):
     return timeago.format(date)
 
 
+def serialise_date(date):
+    return {
+        'ddmmyy': date.strftime("%d/%m/%y"),
+        'hhmmss': date.strftime("%H:%M:%S")
+    }
+
 def is_valid_attribute(attr):
     return attr not in ['metadata', 'query', 'query_class'] and not attr.startswith('_')
 
@@ -28,7 +34,7 @@ def serialise_attribute(attr, date_format):
     return attr
 
 
-def serialise_model(model, date_format=relative_date):
+def serialise_model(model, date_format=serialise_date):
     return {i: serialise_attribute(getattr(model, i), date_format) for i in get_model_attributes(model)}
 
 

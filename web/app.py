@@ -68,20 +68,10 @@ def calendar_month(year, month, day):
         table_json=calendar_render.articles_published_calendar(year, month))
 
 
-@app.route("/", defaults={"mode": "all"})
-@app.route("/<mode>")
-def index(mode):
-    if mode not in ['all', 'this_month', 'this_year', 'today']:
-        flask.abort(404)
-
-    mode_description = {
-        'all': None,
-        'this_month': "This poem was generated from this month's news.",
-        'this_year': "This poem was generated from this year's news.",
-        'today': "This poem was generated from today's news."
-    }
-
+@app.route("/")
+def index():
     return flask.render_template(
-        "index.html",
-         mode_description=mode_description[mode],
-         poem=poem_generator.generate_poem())
+        "rabbit.html",
+         poem_of_the_day=poem_generator.generate_poem('today'),
+         poem_of_the_month=poem_generator.generate_poem('this_month'),
+         poem_of_the_year=poem_generator.generate_poem('this_year'))
