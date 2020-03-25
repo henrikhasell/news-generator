@@ -2,8 +2,19 @@ import datetime
 import logging
 import markovify
 import storage
+import uuid
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
+
+class Poem:
+    def __init__(self, paragraphs, date_generated, mode):
+        self.paragraphs = paragraphs
+        self.date_generated = date_generated
+        self.mode = mode
+
+    def save(self):
+        self.uuid = uuid.uuid1()
 
 
 class PoemGenerator:
@@ -47,11 +58,8 @@ class PoemGenerator:
             result += [chosen_dict.make_short_sentence(75)]
             logging.debug(f"Generated short sentence {i + 1} of 4.")
 
-        logging.debug("Generating list of stansas.")
-        result = list(i for i in result if i != None)
-
-        logging.debug("Poem generation done.")
-        return result
+        paragraphs = list(i for i in result if i != None)
+        return Poem(parahraphs, datetime.now(), mode)
 
     def _get_text(self, from_date, until_date):
         text = storage.get_text(from_date, until_date)
