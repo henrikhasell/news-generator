@@ -11,7 +11,7 @@
   </style>
 {% endblock %}
 {% block navbar %}
-    <nav class="bg-light navbar navbar-expand-md navbar-light py-4 px-5 sticky-top text-monospace">
+    <nav class="bg-light navbar navbar-expand-md navbar-light py-4 px-md-5 shadow-sm sticky-top text-monospace">
       <a class="navbar-brand" href="{{ url_for("index") }}">Down The Rabbit-Hole</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapse">
         <span class="navbar-toggler-icon"></span>
@@ -20,10 +20,10 @@
       <div class="collapse navbar-collapse" id="collapse">
         <ul class="navbar-nav ml-auto">
           <li class="nav-item pl-md-3 active">
-            <a class="nav-link" href="#">The Rabbit</a>
+		  <a class="nav-link" href="{{ url_for("index") }}">The Rabbit</a>
           </li>
           <li class="nav-item pl-md-3">
-            <a class="nav-link" href="#">News Database</a>
+		  <a class="nav-link" href="{{ url_for("calendar_year") }}">News Database</a>
           </li>
           <li class="nav-item pl-md-3">
             <a class="nav-link" href="#">About This Site</a>
@@ -31,44 +31,4 @@
         </ul>
       </div>
     </nav>
-{% endblock %}
-{% block content %}
-  <div class="container pt-3 text-monospace">
-    <div class="row">
-      <div class="col-md-4">
-        <div class="py-5">
-          <h4>Poem Of The Day</h4>
-          <h5>By The Rabbit</h5>
-        </div>
-	<div>
-          {% for sentence in poem_of_the_day %}
-	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
-	  {% endfor %}
-	</div>
-      </div>
-      <div class="col-md-4">
-        <div class="py-5">
-          <h4>Poem Of The Month</h4>
-          <h5>By The Rabbit</h5>
-        </div>
-	<div>
-          {% for sentence in poem_of_the_month %}
-	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
-	  {% endfor %}
-	</div>
-      </div>
-      <div class="col-md-4">
-        <div class="py-5">
-          <h4>Poem Of The Year</h4>
-          <h5>By The Rabbit</h5>
-        </div>
-	<div>
-          {% for sentence in poem_of_the_year %}
-	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
-	  {% endfor %}
-	</div>
-      </div>
-    </div>
-    <p class="text-right" style="margin-top:100px">Constantly generating. Launched at 27/01/2020</p>
-  </div>
 {% endblock %}

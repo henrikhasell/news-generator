@@ -3,6 +3,7 @@ from dateutil.rrule import DAILY, rrule
 from retry import retry
 import flask_sqlalchemy
 import logging
+import poem
 import sqlalchemy
 import timeago
 
@@ -48,7 +49,7 @@ class Article(db.Model):
     date_added = db.Column(db.DateTime)
 
 
-class Poem:
+class Poem(db.Model):
     id = db.Column(db.String, primary_key=True)
     date_generated = db.Column(db.DateTime)
     paragraphs = db.Column(db.JSON)
@@ -62,6 +63,23 @@ def save_poem(poem):
         paragraphs=poem.paragraphs,
         mode=poem.mode
     )
+    logging.debug(f'Saving {poem.mode} article: {poem.uuid}')
+    db.session.add(db_poem)
+    db.session.commit()
+
+
+def get_poem(uuid):
+    db_poem = Poem.query.filter_by(id=uuid).one_or_none()
+    if not db_poem:
+        return
+    return poem.Poem(
+        db_poem.paragraphs,
+        db_poem.date_generated,
+        db_poem.mode,
+        db_poem.id
+    )
+
+
 @retry(tries=3, delay=1)
 def initialise(app):
     db.init_app(app)
@@ -158,10 +176,6 @@ def count_articles_by_date_added(from_date, until_date, exclude_categories=[]):
         result[string_time] += 1
 
     return result
-
-
-def save_article(article: Article):
-    pass
 
 
 def get_articles_by_category(category):

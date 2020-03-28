@@ -51,6 +51,33 @@ def article(article_id):
     return flask.render_template("article.html", article=article)
 
 
+@app.route("/poem/<uuid>")
+def poem(uuid):
+    poem=storage.get_poem(uuid)
+    title_dict = {
+        'today': 'Poem of the Day',
+        'this_month': 'Poem of the Month',
+        'this_year': 'Poem of the Year'
+    }
+    if not poem:
+        flask.abort(404)
+
+    return flask.render_template(
+        "poem.html",
+        poem=poem,
+        title=title_dict[poem.mode]
+    )
+
+
+@app.route("/calendar", defaults={"year": 2020})
+@app.route("/calendar/<int:year>")
+def calendar_year(year):
+    return flask.render_template(
+        "calendar_year.html",
+        table_json=calendar_render.articles_published_by_year(year)
+    )
+
+
 @app.route("/calendar/<int:year>/<int:month>", defaults={"day": None})
 @app.route("/calendar/<int:year>/<int:month>/<int:day>")
 def calendar_month(year, month, day):
@@ -71,7 +98,7 @@ def calendar_month(year, month, day):
 @app.route("/")
 def index():
     return flask.render_template(
-        "rabbit.html",
+        "index.html",
          poem_of_the_day=poem_generator.generate_poem('today'),
          poem_of_the_month=poem_generator.generate_poem('this_month'),
          poem_of_the_year=poem_generator.generate_poem('this_year'))

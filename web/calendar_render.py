@@ -36,11 +36,9 @@ def articles_published_calendar(year, month):
     return table_json(article_count, year, month)
 
 
-def articles_added_calendar(year, month):
-    from_date = datetime(year, month, 1)
-    until_date = datetime(year, month, monthrange(year, month)[1])
-
-    article_count = storage.count_articles_by_date_added(
-        from_date, until_date)
-
-    return table_json(article_count, year, month)
+def articles_published_by_year(year):
+    for month in range(1, 13):
+        yield {
+            'month': datetime(year, month, 1).strftime('%B %Y'),
+            'table': articles_published_calendar(year, month)
+        }

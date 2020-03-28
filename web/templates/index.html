@@ -1,62 +1,59 @@
-{%  extends "bootstrap.html" %}
-{% block  title %}Poem Generator{% endblock %}
-{% block body %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Down The Rabbit Hole</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Dropdown
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Something else here</a>
+{% extends "rabbit.html" %}
+{% block title %}Down The Rabbit Hole - Poem Generator{% endblock %}
+{% block content %}
+  <div class="container pt-3 text-monospace">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="py-5">
+          <h4>Poem Of The Day</h4>
+          <h5>By The Rabbit</h5>
         </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-      </li>
-    </ul>
-    <form class="form-inline my-2 my-lg-0">
-      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-    </form>
+	<div>
+          {% for sentence in poem_of_the_day.paragraphs %}
+	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
+	  {% endfor %}
+	</div>
+      </div>
+      <div class="col-md-4">
+        <div class="py-5">
+          <h4>Poem Of The Month</h4>
+          <h5>By The Rabbit</h5>
+        </div>
+	<div>
+          {% for sentence in poem_of_the_month.paragraphs %}
+	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
+	  {% endfor %}
+	</div>
+      </div>
+      <div class="col-md-4">
+        <div class="py-5">
+          <h4>Poem Of The Year</h4>
+          <h5>By The Rabbit</h5>
+        </div>
+	<div>
+          {% for sentence in poem_of_the_year.paragraphs %}
+	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
+	  {% endfor %}
+	</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="py-5">
+	    <a class="text-dark" href="{{ url_for('poem', uuid=poem_of_the_day.uuid) }}">Permalink</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="py-5">
+	    <a class="text-dark" href="{{ url_for('poem', uuid=poem_of_the_month.uuid) }}">Permalink</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="py-5">
+	    <a class="text-dark" href="{{ url_for('poem', uuid=poem_of_the_year.uuid) }}">Permalink</a>
+        </div>
+      </div>
+    </div>
+    <p class="text-right" style="margin-top:100px">Constantly generating. Launched at 27/01/2020</p>
   </div>
-</nav>
-    <h1>Poem Generator</h1>
-    {% if mode_description %}
-        <p><em>{{ mode_description }}</em></p>
-    {% endif %}
-    <hr/>
-    {% for line in poem %}
-        <p>{{ line }}</p>
-    {% endfor %}
-    <hr/>
-    <ul>
-        <li>
-            <a href="{{ url_for('index', mode='today') }}">Poem From Today</a>
-        </li>
-        <li>
-            <a href="{{ url_for('index', mode='this_month') }}">Poem From This Month</a>
-        </li>
-        <li>
-            <a href="{{ url_for('index', mode='this_year') }}">Poem From This Year</a>
-        </li>
-        <li>
-            <a href="{{ url_for('index') }}">Poem From All Time</a>
-        </li>
-    </ul>
 {% endblock %}

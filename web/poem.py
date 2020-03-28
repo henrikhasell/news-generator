@@ -7,14 +7,21 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
+def generate_poem_uuid():
+    return f'{uuid.uuid4()}'[:8]
+
+
 class Poem:
-    def __init__(self, paragraphs, date_generated, mode):
+    def __init__(self, paragraphs, date_generated, mode, uuid=None):
         self.paragraphs = paragraphs
         self.date_generated = date_generated
         self.mode = mode
+        if not uuid:
+            self.save()
 
     def save(self):
-        self.uuid = uuid.uuid1()
+        self.uuid = generate_poem_uuid()
+        storage.save_poem(self)
 
 
 class PoemGenerator:
@@ -55,18 +62,16 @@ class PoemGenerator:
         result = []
 
         for i in range(4):
-            result += [chosen_dict.make_short_sentence(75)]
+            result += [chosen_dict.make_short_sentence(150)]
             logging.debug(f"Generated short sentence {i + 1} of 4.")
 
         paragraphs = list(i for i in result if i != None)
-        return Poem(parahraphs, datetime.now(), mode)
+        return Poem(paragraphs, datetime.now(), mode)
 
     def _get_text(self, from_date, until_date):
         text = storage.get_text(from_date, until_date)
         try:
             result = markovify.Text(text)
         except KeyError as e:
-            if not self.combined_files:
-                raise e
-            result = self.combined_files
+            result = self.combined_files if hasattr(self, 'combined_files') else ''
         return result

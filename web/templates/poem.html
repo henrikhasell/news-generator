@@ -1,0 +1,22 @@
+{% extends "rabbit.html" %}
+{% block title %}Down The Rabbit Hole - Poem Generator{% endblock %}
+{% block content %}
+  <div class="container pt-3 text-monospace">
+    <div class="row">
+      <div class="col-md-4"></div>
+      <div class="col-md-4">
+        <div class="py-5">
+		<h4>{{ title }}</h4>
+          <h5>By The Rabbit</h5>
+        </div>
+	<div>
+          {% for sentence in poem.paragraphs %}
+	      {% if sentence %}<p>{{ sentence }}</p>{% endif %}
+	  {% endfor %}
+	</div>
+      </div>
+      <div class="col-md-4"></div>
+    </div>
+    <p class="text-right" style="margin-top:100px">Constantly generating. Launched at 27/01/2020</p>
+  </div>
+{% endblock %}

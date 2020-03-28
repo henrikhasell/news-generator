@@ -1,0 +1,38 @@
+{% extends "rabbit.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% for index in table_json %}
+            <div class="col-sm-6">
+                <h2 class="pt-3">{{ index["month"] }}</h2>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thu</th>
+                        <th>Fri</th>
+                        <th>Sat</th>
+                        <th>Sun</th>
+              	</tr>
+                    </thead>
+                    <tbody class="text-center">
+                        {% for row in index["table"] %}
+              	      <tr>
+              	      {% for day in row %}
+              	          {% if day %}<td>{% else %}<td class="bg-light">{% endif %}
+              	              {{ day["count"] if day else "-" }}
+                                </td>
+              	      {% endfor %}
+              	      </tr>
+              	  {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
