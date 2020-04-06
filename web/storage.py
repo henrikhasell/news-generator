@@ -192,7 +192,8 @@ def get_articles(from_date, until_date, exclude_categories=[]):
     articles = Article.query \
         .filter(Article.date_published >= from_date) \
         .filter(Article.date_published <= until_date) \
-        .filter(Article.category.notin_(exclude_categories)).all()
+        .filter(Article.category.notin_(exclude_categories)) \
+        .order_by(Article.date_published).all()
 
     return [serialise_model(i) for i in articles]
 

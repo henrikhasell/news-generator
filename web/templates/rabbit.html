@@ -19,14 +19,14 @@
 
       <div class="collapse navbar-collapse" id="collapse">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item pl-md-3 active">
-		  <a class="nav-link" href="{{ url_for("index") }}">The Rabbit</a>
+          <li class="nav-item pl-md-3 {{ "active" if request.endpoint == "index" }}">
+            <a class="nav-link" href="{{ url_for("index") }}">The Rabbit</a>
           </li>
-          <li class="nav-item pl-md-3">
-		  <a class="nav-link" href="{{ url_for("calendar_year") }}">News Database</a>
+          <li class="nav-item pl-md-3 {{ "active" if request.endpoint == "calendar_year" }}">
+            <a class="nav-link" href="{{ url_for("calendar_year") }}">News Database</a>
           </li>
-          <li class="nav-item pl-md-3">
-            <a class="nav-link" href="#">About This Site</a>
+          <li class="nav-item pl-md-3 {{ "active" if request.endpoint == "about" }}">
+            <a class="nav-link" href="{{ url_for("about") }}">About This Site</a>
           </li>
         </ul>
       </div>

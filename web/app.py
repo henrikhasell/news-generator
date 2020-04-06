@@ -92,7 +92,13 @@ def calendar_month(year, month, day):
     return flask.render_template(
         "calendar.html",
         articles=articles,
-        table_json=calendar_render.articles_published_calendar(year, month))
+        table_json=calendar_render.articles_published_calendar(year, month),
+        title=datetime(year, month, 1).strftime('%B %Y'))
+
+
+@app.route("/about")
+def about():
+    return flask.render_template("about.html")
 
 
 @app.route("/")
