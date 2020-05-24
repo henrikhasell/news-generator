@@ -18,4 +18,4 @@ WORKDIR /app
 COPY api.py app.py calendar_render.py poem.py storage.py ./
 COPY templates ./templates
 
-ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:9000", "-t", "120", "-w", "4", "app:app"]
+ENTRYPOINT ["gunicorn", "-b", "0.0.0.0:9000", "-t", "120", "-w", "2", "app:app"]

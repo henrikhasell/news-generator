@@ -1,9 +1,9 @@
 import flask
 import logging
 import os
-import api
 import calendar_render
 import poem
+import api
 import sentry_sdk
 import storage
 from datetime import datetime
@@ -108,3 +108,8 @@ def index():
          poem_of_the_day=poem_generator.generate_poem('today'),
          poem_of_the_month=poem_generator.generate_poem('this_month'),
          poem_of_the_year=poem_generator.generate_poem('this_year'))
+
+
+@app.route("/poem")
+def get_poem():
+    return flask.jsonify(poem_generator.generate_poem('today').paragraphs)

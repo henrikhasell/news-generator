@@ -1,6 +1,8 @@
+import app
 import flask
 import flask_restplus
 import storage
+
 
 blueprint = flask.Blueprint('api', __name__)
 api = flask_restplus.Api(blueprint)
