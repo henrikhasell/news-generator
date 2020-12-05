@@ -91,7 +91,7 @@ def fetch_bbc_news_article(article_id):
 
     if not all_dates_in_article:
         all_dates_in_article = \
-            [int(i.attrs[date_attribute] for i in soup.findAll("time", {date_attribute: True})]
+            [int(i.attrs[date_attribute]) for i in soup.findAll("time", {date_attribute: True})]
 
     if len(all_dates_in_article) == 0:
         raise ArticleError(f"Could not find date in {article_id}")
