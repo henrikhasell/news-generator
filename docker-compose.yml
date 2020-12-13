@@ -12,15 +12,12 @@ services:
     ports:
       - 0.0.0.0:9000:9000/tcp
     restart: unless-stopped
-  headlines:
-    build: ./headlines
+  crawler:
+    build: ./crawler
     depends_on:
       - web
     environment:
       - WEB_URL=http://web:9000/api/articles
-      - ELASTIC_USER
-      - ELASTIC_PASS
-      - HEADLINES_SENTRY_DSN
     restart: unless-stopped
   postgres:
     image: postgres

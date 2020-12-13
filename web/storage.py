@@ -1,18 +1,15 @@
-from datetime import datetime
+from datetime import datetime, timezone
+
 from dateutil.rrule import DAILY, rrule
-from retry import retry
 import flask_sqlalchemy
 import logging
-import poem
 import sqlalchemy
-import timeago
+from retry import retry
+
+import poem
 
 
 db = flask_sqlalchemy.SQLAlchemy()
-
-
-def relative_date(date):
-    return timeago.format(date)
 
 
 def serialise_date(date):
@@ -21,8 +18,9 @@ def serialise_date(date):
         'hhmmss': date.strftime("%H:%M:%S")
     }
 
+
 def is_valid_attribute(attr):
-    return attr not in ['metadata', 'query', 'query_class'] and not attr.startswith('_')
+    return attr not in {'metadata', 'query', 'query_class'} and not attr.startswith('_')
 
 
 def get_model_attributes(model):
@@ -40,8 +38,7 @@ def serialise_model(model, date_format=serialise_date):
 
 
 class Article(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String, unique=True)
+    url = db.Column(db.String, primary_key=True)
     title = db.Column(db.String)
     category = db.Column(db.String)
     paragraphs = db.Column(db.JSON)
@@ -87,15 +84,7 @@ def initialise(app):
         db.create_all()
 
 
-def article_exists(url):
-    article = Article.query.filter_by(url=url).one_or_none()
-    return bool(article)
-
-
 def add_article(article_json):
-    if article_exists(article_json["url"]):
-        return
-
     logging.info(f"Adding article {article_json['url']}")
 
     article = Article(
@@ -104,7 +93,7 @@ def add_article(article_json):
         category=article_json["category"],
         paragraphs=article_json["paragraphs"],
         date_published=article_json["date_published"],
-        date_added=datetime.now()
+        date_added=datetime.utcnow().replace(tzinfo=timezone.utc)
     )
 
     result = {"title": article.title}
@@ -112,9 +101,11 @@ def add_article(article_json):
     try:
         db.session.add(article)
         db.session.commit()
+        result = 'Article sucessfully posted.'
         return_code = 201
     except sqlalchemy.exc.IntegrityError:
         db.session.rollback()
+        result = 'Article already exists.'
         return_code = 200
 
     return result, return_code

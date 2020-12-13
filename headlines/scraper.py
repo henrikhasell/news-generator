@@ -1,17 +1,13 @@
 import concurrent.futures
 import hashlib
+import json
 import os
 import re
 import requests
 import retry
 from bs4 import BeautifulSoup
 from datetime import datetime
-from elasticsearch import Elasticsearch
-
-
-elastic_user = os.environ.get('ELASTIC_USER', None)
-elastic_pass = os.environ.get('ELASTIC_PASS', None)
-web_url = os.environ.get('WEB_URL', 'http://localhost:5000/api/articles')
+from typing import List, Optional
 
 
 class ArticleError(Exception):
@@ -19,21 +15,26 @@ class ArticleError(Exception):
 
 
 class Article:
-    def __init__(self, id, title, date, content, related, category):
-        self.id = id
+    def __init__(
+        self: object,
+        url: str,
+        title: str,
+        date: datetime,
+        content: str,
+        related: List[str],
+        category: str
+    ):
+        self.url = url
         self.title = title
         self.date = date
         self.content = content
         self.related = related
         self.category = category
 
-    def hash(self):
-        return hashlib.md5(self.content.encode("utf-8")).hexdigest()[:10]
+    def hash(self: object) -> str:
+        return hashlib.md5(json.dumps(self.json()).encode("utf-8")).hexdigest()[:10]
 
-    def url(self):
-        return f'https://www.bbc.co.uk/news/{self.id}'
-
-    def json(self):
+    def json(self: object) -> dict:
         return {
             'url': self.url(),
             'title': self.title,
@@ -42,7 +43,7 @@ class Article:
             'category': self.category
         }
 
-    def elastic_info(self):
+    def elastic_info(self: object) -> dict:
         return {
             'body': {
                 'date_downloaded': datetime.now().isoformat(),
@@ -61,14 +62,14 @@ def stringify_soup(element):
     return "".join(stringify_soup(child) for child in element.children)
 
 
-def get_article_id_from_string(string):
-    match = re.match(".*/news/(.+-\d+.+?)", string)
+def get_article_id_from_url(url: str) -> Optional[str]:
+    match = re.match(r'.*/news/(.+-\d+.+?)', url)
     if match:
         return match.groups()[0]
 
 
-def is_news_article(href):
-    return bool(get_article_id_from_string(href))
+def is_news_article(url: str) -> bool:
+    return bool(get_article_id_from_url(url))
 
 
 def create_directory_if_not_exist(directory):
@@ -77,8 +78,8 @@ def create_directory_if_not_exist(directory):
 
 
 @retry.retry(exceptions=requests.RequestException, tries=5)
-def fetch_bbc_news_article(article_id):
-    result = requests.get(f"https://www.bbc.co.uk/news/{article_id}")
+def fetch_bbc_news_article(article_url: str) -> Article:
+    result = requests.get(article_url)
     soup = BeautifulSoup(result.text, 'html.parser')
 
     paragraphs = soup.find_all("p")
@@ -94,7 +95,7 @@ def fetch_bbc_news_article(article_id):
             [int(i.attrs[date_attribute]) for i in soup.findAll("time", {date_attribute: True})]
 
     if len(all_dates_in_article) == 0:
-        raise ArticleError(f"Could not find date in {article_id}")
+        raise ArticleError(f"Could not find date in {article_url}")
 
     all_links_in_article = [a.attrs["href"] for a in soup.findAll("a", {"href": True})]
 
@@ -102,12 +103,12 @@ def fetch_bbc_news_article(article_id):
 
     article_date = datetime.fromtimestamp(all_dates_in_article[0]) # Assuming the first date is the correct date.
     article_data = "\n".join(stringify_soup(item) for item in paragraphs_without_attributes)
-    article_related = list(get_article_id_from_string(a) for a in all_links_in_article if is_news_article(a))
+    article_related = list(filter(is_news_article, all_links_in_article))
 
     article_category = soup.find("meta", {"property": "article:section"}).attrs['content']
 
     return Article(
-        article_id,
+        article_url,
         article_title,
         article_date,
         article_data,
@@ -115,14 +116,6 @@ def fetch_bbc_news_article(article_id):
         article_category
     )
 
-
-def post_news_article_elasticsearch(article):
-    if not elastic_user or not elastic_pass:
-        return
-
-    article_json = article.elastic_info()
-    es = Elasticsearch(["172.17.0.1"], http_auth=(elastic_user, elastic_pass))
-    es.index(**article_json)
 
 @retry.retry(tries=5)
 def post_news_article(article):
@@ -149,7 +142,7 @@ def fetch_and_save_bbc_news_article(article_id):
     return article
 
 
-def crawl(article_id):
+def crawl(article_id: str):
     article = fetch_and_save_bbc_news_article(article_id)
     for related_article in article.related:
         crawl(related_article)

@@ -29,13 +29,13 @@ def get_all_articles_at_url(url):
     soup = BeautifulSoup(response.text, 'html.parser')
     all_anchors_in_article = soup.find_all('a')
     hrefs = [i.attrs['href'] for i in all_anchors_in_article]
-    return [get_article_id_from_string(i) for i in hrefs if is_news_article(i)]
+    return list(filter(is_news_article, hrefs))
 
 
 def save_all_articles_at_url(url):
-    for article_id in get_all_articles_at_url(url):
+    for article_url in get_all_articles_at_url(url):
         try:
-            crawl_concurrent(article_id)
+            crawl_concurrent(article_url)
         except ArticleError as e:
             logging.error(e)
 
