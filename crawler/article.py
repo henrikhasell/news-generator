@@ -1,11 +1,25 @@
 from datetime import datetime
 from hashlib import md5
 from typing import List
-
 import json
+
+from .scraper import Scraper
 
 
 class Article:
+    @staticmethod
+    def from_scraper(scraper: Scraper):
+        url = scraper.url
+
+        return Article(
+            f'{url.scheme}://{url.hostname}{url.path}',
+            scraper.get_title(),
+            scraper.get_date(),
+            scraper.get_content(),
+            scraper.get_related(),
+            scraper.get_category()
+        )
+
     def __init__(
         self: object,
         url: str,

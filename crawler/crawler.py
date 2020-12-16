@@ -7,7 +7,7 @@ from .logger import logger
 from .scraper import Scraper, ScraperError
 
 
-QueueItem = namedtuple('QueueItem', {'url', 'depth'})
+QueueItem = namedtuple('QueueItem', ['url', 'depth'])
 
 
 class Crawler:
@@ -25,29 +25,26 @@ class Crawler:
         self.queue += [QueueItem(url, depth)]
         self.visited_sites.add(url)
 
+    def get_article(self: object, url: str) -> Article:
+        scraper = Scraper(url)
+
+        return Article.from_scraper(scraper)
+
     def crawl(self: object) -> Generator[Article, None, None]:
         while len(self.queue) > 0:
-            with ThreadPoolExecutor(max_workers=8) as executor:
-                mapping = {executor.submit(Scraper, i.url): i for i in self.queue}
+            with ThreadPoolExecutor(max_workers=32) as executor:
+                mapping = {executor.submit(self.get_article, i.url): i for i in self.queue}
                 self.queue = []
-
                 for future in as_completed(mapping):
                     url, depth = mapping[future]
-                    scraper = future.result()
-                    related = scraper.get_related()
 
                     try:
-                        yield Article(
-                            url,
-                            scraper.get_title(),
-                            scraper.get_date(),
-                            scraper.get_content(),
-                            related,
-                            scraper.get_category()
-                        )
+                        article = future.result()
                         logger.info(f'✅ {url} ({depth})')
                     except ScraperError:
                         logger.info(f'❎ {url} ({depth})')
 
-                    for url in related:
+                    yield article
+
+                    for url in article.related:
                         self._append_queue(url, depth + 1)

@@ -96,12 +96,10 @@ def add_article(article_json):
         date_added=datetime.utcnow().replace(tzinfo=timezone.utc)
     )
 
-    result = {"title": article.title}
-
     try:
         db.session.add(article)
         db.session.commit()
-        result = 'Article sucessfully posted.'
+        result = 'Article sucessfully added.'
         return_code = 201
     except sqlalchemy.exc.IntegrityError:
         db.session.rollback()

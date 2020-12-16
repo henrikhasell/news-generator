@@ -1,12 +1,12 @@
 from typing import List, Optional
-from urllib.parse import urlparse
+from urllib.parse import ParseResult, urlparse
 
 import bs4
 import requests
 from datetime import datetime, timezone
 from retry import retry
 
-from .article import Article
+from .logger import logger
 from .utilities import is_news_article
 
 
@@ -29,21 +29,39 @@ class Scraper:
     ]
 
     @staticmethod
+    def format_url(url: str) -> ParseResult:
+        url_parse = urlparse(url)
+
+        if url_parse.scheme == 'http':
+            scheme = 'https'
+        else:
+            scheme = url_parse.scheme
+
+        if url_parse.hostname == 'www.bbc.com':
+            hostname = 'www.bbc.co.uk'
+        else:
+            hostname = url_parse.hostname
+
+        return urlparse(f'{scheme}://{hostname}{url_parse.path}')
+
+    @staticmethod
     @retry(exceptions=requests.RequestException, tries=5, delay=1)
-    def fetch_article(url: str) -> requests.Response:
+    def fetch(url: str) -> requests.Response:
         return requests.get(url)
 
     def __init__(self: object, url: str):
-        result = Scraper.fetch_article(url)
-        result.encoding = result.apparent_encoding
+        result = Scraper.fetch(url)
+        result.encoding = 'utf-8'
+
         self.soup = bs4.BeautifulSoup(result.text, 'html.parser')
-        self.url = urlparse(url)
+        self.url = Scraper.format_url(url)
 
     def _format_href(self: object, href: str) -> str:
         if href.startswith('/'):
-            return f'{self.url.scheme}://{self.url.hostname}{href}'
-        
-        url = urlparse(href)
+            href = f'{self.url.scheme}://{self.url.hostname}{href}'
+    
+        url = Scraper.format_url(href)
+
         return f'{url.scheme}://{url.hostname}{url.path}'
 
     def get_title(self: object) -> str:
@@ -72,9 +90,8 @@ class Scraper:
         return [self._format_href(i) for i in hrefs]
 
     def get_content(self: object) -> List[str]:
-        article_paragraphs = self.soup.find_all('p')
-        article_paragraphs = filter(lambda i: not i.attrs, article_paragraphs)
-        return [_stringify_soup(i) for i in article_paragraphs]
+        paragraphs = self.soup.article.find_all('div', {'data-component': 'text-block'})
+        return [i.text for i in paragraphs]
 
     def get_category(self: object) -> str:
         return self.soup.find('meta', {'property': 'article:section'}).attrs['content']

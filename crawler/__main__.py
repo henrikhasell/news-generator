@@ -3,6 +3,7 @@ import os
 import requests
 
 from .crawler import Crawler
+from .logger import logger
 
 
 if __name__ == '__main__':
